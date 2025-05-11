@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auth Page</title>
+  <style>
+    :root { --teal:#008080; --turquoise:#40E0D0; --gold:#FFD700; }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{display:flex;align-items:center;justify-content:center;height:100vh;background:var(--turquoise);font-family:Arial,sans-serif;}
+    .container{background:#fff;padding:2rem;border-radius:8px;width:360px;border-top:4px solid var(--teal);box-shadow:0 4px 8px rgba(0,0,0,0.1);}
+    .tabs{display:flex;margin-bottom:1rem;} .tabs button{flex:1;padding:.75rem;border:none;background:var(--turquoise);color:#fff;cursor:pointer;font-weight:bold;transition:background .3s;} .tabs button.active,.tabs button:hover{background:var(--teal);}
+    h2{text-align:center;color:var(--teal);margin-bottom:1rem;}
+    .form-group{margin-bottom:1rem;} label{display:block;margin-bottom:.5rem;color:var(--teal);font-weight:bold;}
+    input{width:100%;padding:.5rem;border:2px solid var(--turquoise);border-radius:4px;transition:border-color .3s;}input:focus{outline:none;border-color:var(--gold);}
+    button.submit-btn{width:100%;padding:.75rem;background:var(--gold);color:#fff;border:none;border-radius:4px;font-weight:bold;cursor:pointer;transition:background .3s;}button.submit-btn:hover{background:var(--teal);}
+    #message{margin-top:1rem;text-align:center;font-weight:bold;}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="tabs">
+      <button id="loginTab" class="active">Login</button>
+      <button id="registerTab">Register</button>
+    </div>
+    <form id="loginForm">
+      <h2>Login</h2>
+      <div class="form-group">
+        <label for="loginUsername">Username</label>
+        <input type="text" id="loginUsername" required />
+      </div>
+      <div class="form-group">
+        <label for="loginPassword">Password</label>
+        <input type="password" id="loginPassword" required />
+      </div>
+      <button type="submit" class="submit-btn">Submit</button>
+    </form>
+    <form id="registerForm" style="display:none;">
+      <h2>Register</h2>
+      <div class="form-group">
+        <label for="regUsername">Username</label>
+        <input type="text" id="regUsername" required />
+      </div>
+      <div class="form-group">
+        <label for="regPassword">Password</label>
+        <input type="password" id="regPassword" required />
+      </div>
+      <button type="submit" class="submit-btn">Create Account</button>
+    </form>
+    <div id="message"></div>
+  </div>
+  <script>
+    const loginTab = document.getElementById('loginTab');
+    const registerTab = document.getElementById('registerTab');
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const messageEl = document.getElementById('message');
+    function showForm(form){
+      loginForm.style.display = form==='login'?'block':'none';
+      registerForm.style.display = form==='register'?'block':'none';
+      loginTab.classList.toggle('active', form==='login');
+      registerTab.classList.toggle('active', form==='register');
+      messageEl.textContent='';
+    }
+    loginTab.addEventListener('click', ()=>showForm('login'));
+    registerTab.addEventListener('click', ()=>showForm('register'));
+    async function submit(endpoint, payload){
+      const res = await fetch(endpoint,{
+        method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      if(!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    }
+    loginForm.addEventListener('submit', async e=>{
+      e.preventDefault();
+      try{
+        const data = await submit('/api/login',{username:loginUsername.value,password:loginPassword.value});
+        messageEl.textContent = data.success?'Login successful!':'Invalid credentials';
+        messageEl.style.color = data.success?'green':'red';
+      }catch(err){ messageEl.textContent = err.message; messageEl.style.color='red'; }
+    });
+    registerForm.addEventListener('submit', async e=>{
+      e.preventDefault();
+      try{
+        const data = await submit('/api/register',{username:regUsername.value,password:regPassword.value});
+        messageEl.textContent = data.success?'Account created successfully!':data.error||'Registration failed';
+        messageEl.style.color = data.success?'green':'red';
+      }catch(err){ messageEl.textContent = err.message; messageEl.style.color='red'; }
+    });
+  </script>
+</body>
+</html>
