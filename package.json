@@ -1,7 +1,7 @@
 {
   "name": "D2E",
   "version": "1.0.0",
-  "description": "Developer-to-End environment for Societe d'Entraide Argy management system",
+  "description": "Developer-to-End environment for Control Hub",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
